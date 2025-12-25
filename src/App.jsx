@@ -1,20 +1,26 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import TodoList from './components/todoList/todoList';
 import TodoControlPanel from './components/todoControlPanel/TodoControlPanel';
 import styles from './App.module.css';
-import { getAll, post, change, remove } from './todosApi';
+import useTodos from './hooks/useTodos';
 
 function App() {
-	const [todos, setTodos] = useState([]);
-	const [newTodo, setNewTodo] = useState('');
-	const [idToChange, setIdToChange] = useState('');
-	const [newTaskValue, setNewTaskValue] = useState('');
 	const [searchValue, setSearchValue] = useState('');
-	const [error, setError] = useState('');
-	const [isLoading, setIsLoading] = useState(false);
 	const [isSorted, setIsSorted] = useState(false);
 
-	const changeInpRef = useRef(null);
+	const {
+		todos,
+		setNewTaskValue,
+		error,
+		isLoading,
+		getTodos,
+		createTodo,
+		changeTodo,
+		deleteTodo,
+		newTaskValue,
+		newTodo,
+		setNewTodo,
+	} = useTodos();
 
 	const filteredTodos = todos.filter((task) => task.title?.includes(searchValue));
 	const filteredAndSortedTodos = filteredTodos.toSorted((a, b) => {
@@ -28,75 +34,8 @@ function App() {
 	let allTodos = !isSorted ? filteredTodos : filteredAndSortedTodos;
 
 	useEffect(() => {
-		try {
-			setIsLoading(true);
-			getAll()
-				.then((newTodos) => setTodos(newTodos))
-				.finally(() => setIsLoading(false));
-		} catch (error) {
-			setError('Не удалось загрузить список дел');
-			setIsLoading(false);
-		}
+		getTodos();
 	}, []);
-
-	function createTodo() {
-		try {
-			setIsLoading(true);
-			if (newTodo === '') {
-				return;
-			}
-			post(newTodo)
-				.then((respTodo) => setTodos((prevTodos) => [...prevTodos, respTodo]))
-				.finally(() => setIsLoading(false));
-			setNewTodo('');
-		} catch (error) {
-			setError('Не удалось создать задачу');
-			setIsLoading(false);
-		}
-	}
-
-	function deleteTodo(id) {
-		try {
-			setIsLoading(true);
-			remove(id)
-				.then(() => {
-					setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-				})
-				.finally(() => setIsLoading(false));
-		} catch (error) {
-			setError('Не удалось удалить задачу');
-			setIsLoading(false);
-		}
-	}
-
-	function changeTodo(id) {
-		try {
-			setIsLoading(true);
-			change(id, newTaskValue)
-				.then(() => {
-					setTodos((prevTodos) =>
-						prevTodos.map((todo) =>
-							todo.id === id ? { ...todo, title: newTaskValue } : todo,
-						),
-					);
-					setIdToChange('');
-				})
-				.finally(() => setIsLoading(false));
-		} catch (error) {
-			setError('Не удалось изменить задачу');
-			setIsLoading(false);
-		}
-	}
-
-	function openEditInput(id, title) {
-		setIdToChange(id);
-		setNewTaskValue(title);
-		setTimeout(() => {
-			if (changeInpRef.current) {
-				changeInpRef.current.focus();
-			}
-		}, 0);
-	}
 
 	return (
 		<>
@@ -111,13 +50,10 @@ function App() {
 				allTodos={allTodos}
 			/>
 			<TodoList
-				idToChange={idToChange}
 				allTodos={allTodos}
-				changeInpRef={changeInpRef}
 				newTaskValue={newTaskValue}
 				setNewTaskValue={setNewTaskValue}
 				changeTodo={changeTodo}
-				openEditInput={openEditInput}
 				deleteTodo={deleteTodo}
 				searchValue={searchValue}
 			/>

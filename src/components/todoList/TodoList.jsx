@@ -1,20 +1,37 @@
+import { useState, useRef } from 'react';
 import styles from './todoList.module.css';
 import { FiTrash2, FiEdit2 } from 'react-icons/fi';
 
 export default function TodoList({
-	idToChange,
 	allTodos,
-	changeInpRef,
 	newTaskValue,
 	setNewTaskValue,
 	changeTodo,
-	openEditInput,
 	deleteTodo,
 	searchValue,
 }) {
+	const changeInpRef = useRef(null);
+	const [idToChange, setIdToChange] = useState('');
+
 	function handleSubmit(event, id) {
 		event.preventDefault();
 		changeTodo(id);
+		setIdToChange('');
+	}
+
+	function openEditInput(id, title) {
+		setIdToChange(id);
+		setNewTaskValue(title);
+		setTimeout(() => {
+			if (changeInpRef.current) {
+				changeInpRef.current.focus();
+			}
+		}, 0);
+	}
+
+	function onBlur(id) {
+		changeTodo(id);
+		setIdToChange('');
 	}
 
 	return (
@@ -29,7 +46,7 @@ export default function TodoList({
 								ref={changeInpRef}
 								value={newTaskValue}
 								onChange={(event) => setNewTaskValue(event.target.value)}
-								onBlur={() => changeTodo(todo.id)}
+								onBlur={() => onBlur(todo.id)}
 								type="text"
 								className={styles.changeInp}
 							/>
