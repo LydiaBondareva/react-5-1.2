@@ -1,32 +1,34 @@
 import styles from './TodoControlPanel.module.css';
 
 export default function TodoControlPanel({
-	addedTodo,
-	onEnter,
-	setAddedTodo,
+	newTodo,
+	setNewTodo,
 	setSearchValue,
-	postTodo,
+	createTodo,
 	searchValue,
 	setSorted,
 	sorted,
-	filteredTodos,
+	allTodos,
 }) {
+	function handleSubmit(event) {
+		event.preventDefault();
+		createTodo();
+	}
 	return (
-		<div className="todoControlPanel">
+		<>
 			<h1>Todos:</h1>
-			<div className={styles.addContainer}>
+			<form onSubmit={handleSubmit} className={styles.сontainer}>
 				<input
 					className={styles.addTodo}
 					placeholder="Введите новое дело..."
-					value={addedTodo}
-					onKeyDown={(event) => onEnter(event, postTodo)}
-					onChange={(event) => setAddedTodo(event.target.value)}
+					value={newTodo}
+					onChange={(event) => setNewTodo(event.target.value)}
 				/>
-				<button onClick={postTodo} className={styles.addBtn}>
+				<button type="submit" className={styles.addBtn}>
 					Добавить в список
 				</button>
-			</div>
-			<div className={styles.addContainer}>
+			</form>
+			<div className={styles.сontainer}>
 				<input
 					onChange={(event) => setSearchValue(event.target.value)}
 					className={styles.search}
@@ -37,10 +39,10 @@ export default function TodoControlPanel({
 			<button
 				className={styles.searchBtn}
 				onClick={() => setSorted(!sorted)}
-				disabled={filteredTodos.length < 2}
+				disabled={allTodos.length < 2}
 			>
 				{sorted ? 'Отменить сортировку' : 'Сортировать по алфавиту'}
 			</button>
-		</div>
+		</>
 	);
 }

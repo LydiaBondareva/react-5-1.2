@@ -2,36 +2,42 @@ import styles from './todoList.module.css';
 import { FiTrash2, FiEdit2 } from 'react-icons/fi';
 
 export default function TodoList({
-	showInput,
-	filteredTodos,
+	idToChange,
+	allTodos,
 	changeInpRef,
 	newTaskValue,
 	setNewTaskValue,
-	onEnter,
 	changeTodo,
-	editTodo,
+	openEditInput,
 	deleteTodo,
 	searchValue,
 }) {
+	function handleSubmit(event, id) {
+		event.preventDefault();
+		changeTodo(id);
+	}
+
 	return (
 		<ul className={styles.list}>
-			{filteredTodos.map((todo) => (
+			{allTodos.map((todo) => (
 				<li key={todo.id} className={styles['list-item']}>
-					{showInput !== todo.id && <span>{todo.title}</span>}
-					{showInput === todo.id && (
-						<input
-							ref={changeInpRef}
-							value={newTaskValue}
-							onChange={(event) => setNewTaskValue(event.target.value)}
-							onKeyDown={(event) => onEnter(event, changeTodo, todo.id)}
-							onBlur={() => changeTodo(todo.id)}
-							type="text"
-							className={styles.changeInp}
-						/>
+					{idToChange !== todo.id ? (
+						<span>{todo.title}</span>
+					) : (
+						<form onSubmit={(event) => handleSubmit(event, todo.id)}>
+							<input
+								ref={changeInpRef}
+								value={newTaskValue}
+								onChange={(event) => setNewTaskValue(event.target.value)}
+								onBlur={() => changeTodo(todo.id)}
+								type="text"
+								className={styles.changeInp}
+							/>
+						</form>
 					)}
 					<div>
 						<button
-							onClick={() => editTodo(todo.id, todo.title)}
+							onClick={() => openEditInput(todo.id, todo.title)}
 							className={styles.editButton}
 						>
 							<FiEdit2 />
@@ -42,7 +48,7 @@ export default function TodoList({
 					</div>
 				</li>
 			))}
-			{!filteredTodos.length &&
+			{!allTodos.length &&
 				searchValue &&
 				'К сожалению, по данному запросу дел не обнаружено'}
 		</ul>

@@ -1,64 +1,95 @@
 import { useEffect, useState, useRef } from 'react';
 import TodoList from './components/todoList/todoList';
 import TodoControlPanel from './components/todoControlPanel/TodoControlPanel';
+import styles from './App.module.css';
+import { getAll, post, change, remove } from './todosApi';
 
 function App() {
 	const [todos, setTodos] = useState([]);
-	const [addedTodo, setAddedTodo] = useState('');
-	const [refreshTodosFlag, setRefreshTodosFlag] = useState(false);
-	const [showInput, setShowInput] = useState('');
+	const [newTodo, setNewTodo] = useState('');
+	const [idToChange, setIdToChange] = useState('');
 	const [newTaskValue, setNewTaskValue] = useState('');
 	const [searchValue, setSearchValue] = useState('');
-	const [sorted, setSorted] = useState(false);
+	const [error, setError] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+	const [isSorted, setIsSorted] = useState(false);
 
 	const changeInpRef = useRef(null);
 
-	const TODOS_URL = import.meta.env.VITE_TODOS_URL;
+	const filteredTodos = todos.filter((task) => task.title?.includes(searchValue));
+	const filteredAndSortedTodos = filteredTodos.toSorted((a, b) => {
+		if (a.title > b.title) {
+			return 1;
+		} else if (a.title < b.title) {
+			return -1;
+		} else return 0;
+	});
 
-	const filteredTodos = !sorted
-		? todos.filter((task) => task.title.includes(searchValue))
-		: todos
-				.filter((task) => task.title.includes(searchValue))
-				.sort((a, b) => {
-					if (a.title > b.title) {
-						return 1;
-					} else if (a.title < b.title) {
-						return -1;
-					} else return 0;
-				});
+	let allTodos = !isSorted ? filteredTodos : filteredAndSortedTodos;
 
 	useEffect(() => {
-		fetch(TODOS_URL)
-			.then((data) => data.json())
-			.then((newTodos) => setTodos(newTodos));
-	}, [refreshTodosFlag, TODOS_URL]);
+		try {
+			setIsLoading(true);
+			getAll()
+				.then((newTodos) => setTodos(newTodos))
+				.finally(() => setIsLoading(false));
+		} catch (error) {
+			setError('Не удалось загрузить список дел');
+			setIsLoading(false);
+		}
+	}, []);
 
-	function refreshTodos() {
-		setRefreshTodosFlag(!refreshTodosFlag);
-	}
-
-	function onEnter(event, func, id) {
-		if (event.key === 'Enter') {
-			func(id);
+	function createTodo() {
+		try {
+			setIsLoading(true);
+			if (newTodo === '') {
+				return;
+			}
+			post(newTodo)
+				.then((respTodo) => setTodos((prevTodos) => [...prevTodos, respTodo]))
+				.finally(() => setIsLoading(false));
+			setNewTodo('');
+		} catch (error) {
+			setError('Не удалось создать задачу');
+			setIsLoading(false);
 		}
 	}
 
-	function postTodo() {
-		if (addedTodo === '') {
-			return;
+	function deleteTodo(id) {
+		try {
+			setIsLoading(true);
+			remove(id)
+				.then(() => {
+					setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+				})
+				.finally(() => setIsLoading(false));
+		} catch (error) {
+			setError('Не удалось удалить задачу');
+			setIsLoading(false);
 		}
-		fetch(TODOS_URL, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				title: addedTodo,
-			}),
-		}).then(refreshTodos);
-		setAddedTodo('');
 	}
 
-	function editTodo(id, title) {
-		setShowInput(id);
+	function changeTodo(id) {
+		try {
+			setIsLoading(true);
+			change(id, newTaskValue)
+				.then(() => {
+					setTodos((prevTodos) =>
+						prevTodos.map((todo) =>
+							todo.id === id ? { ...todo, title: newTaskValue } : todo,
+						),
+					);
+					setIdToChange('');
+				})
+				.finally(() => setIsLoading(false));
+		} catch (error) {
+			setError('Не удалось изменить задачу');
+			setIsLoading(false);
+		}
+	}
+
+	function openEditInput(id, title) {
+		setIdToChange(id);
 		setNewTaskValue(title);
 		setTimeout(() => {
 			if (changeInpRef.current) {
@@ -67,55 +98,35 @@ function App() {
 		}, 0);
 	}
 
-	function changeTodo(id) {
-		fetch(`http://localhost:3000/todos/${id}`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				title: newTaskValue,
-			}),
-		}).then(() => {
-			setTodos((prevTodos) =>
-				prevTodos.map((todo) =>
-					todo.id === id ? { ...todo, title: newTaskValue } : todo,
-				),
-			);
-			setShowInput('');
-			refreshTodos();
-		});
-	}
-
-	function deleteTodo(id) {
-		fetch(TODOS_URL + `/${id}`, {
-			method: 'DELETE',
-		}).then(refreshTodos);
-	}
-
 	return (
 		<>
 			<TodoControlPanel
-				addedTodo={addedTodo}
-				onEnter={onEnter}
-				setAddedTodo={setAddedTodo}
+				newTodo={newTodo}
+				setNewTodo={setNewTodo}
 				setSearchValue={setSearchValue}
-				postTodo={postTodo}
+				createTodo={createTodo}
 				searchValue={searchValue}
-				setSorted={setSorted}
-				sorted={sorted}
-				filteredTodos={filteredTodos}
+				setSorted={setIsSorted}
+				sorted={isSorted}
+				allTodos={allTodos}
 			/>
 			<TodoList
-				showInput={showInput}
-				filteredTodos={filteredTodos}
+				idToChange={idToChange}
+				allTodos={allTodos}
 				changeInpRef={changeInpRef}
 				newTaskValue={newTaskValue}
 				setNewTaskValue={setNewTaskValue}
-				onEnter={onEnter}
 				changeTodo={changeTodo}
-				editTodo={editTodo}
+				openEditInput={openEditInput}
 				deleteTodo={deleteTodo}
 				searchValue={searchValue}
 			/>
+			{isLoading && (
+				<div className={styles['spinner-container']}>
+					<div className={styles.spinner}></div>
+				</div>
+			)}
+			{error && <div className={styles.error}>{error}</div>}
 		</>
 	);
 }

@@ -1,0 +1,31 @@
+.error {
+	margin-top: 30px;
+  color: #cc0000;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Простой и маленький спиннер */
+.spinner {
+  width: 20px; /* Меньше размер */
+  height: 20px; /* Меньше размер */
+  border: 2px solid #3399ff; /* Цвет и толщина линии */
+  border-top: 2px solid transparent; /* Делаем верхнюю часть прозрачной */
+  border-radius: 50%;
+  animation: spin 1s linear infinite; /* Добавляем анимацию вращения */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
