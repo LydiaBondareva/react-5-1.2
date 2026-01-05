@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: sans-serif;
+}
+
+.text {
+  font-size: 2.5em;
+  color: #e4717a;
+  margin-bottom: 50px;
+}
+
+.link {
+  padding: 12px 25px;
+  background-color: #f2b7bc;
+  color: #633a3d;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease;
+}
+
+.link:hover {
+  background-color: #e9989e;
+}

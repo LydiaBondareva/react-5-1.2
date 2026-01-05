@@ -7,6 +7,7 @@ export default function useTodos() {
 	const [newTaskValue, setNewTaskValue] = useState('');
 	const [error, setError] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const [isTaskDeleted, setIsTaskDeleted] = useState(false);
 
 	function getTodos() {
 		try {
@@ -42,8 +43,11 @@ export default function useTodos() {
 			remove(id)
 				.then(() => {
 					setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+					setIsTaskDeleted(true);
 				})
-				.finally(() => setIsLoading(false));
+				.finally(() => {
+					setIsLoading(false);
+				});
 		} catch (error) {
 			setError('Не удалось удалить задачу');
 			setIsLoading(false);
@@ -80,5 +84,7 @@ export default function useTodos() {
 		newTaskValue,
 		newTodo,
 		setNewTodo,
+		isTaskDeleted,
+		setIsTaskDeleted,
 	};
 }
