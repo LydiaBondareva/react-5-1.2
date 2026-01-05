@@ -1,15 +1,18 @@
+import { useOutletContext } from 'react-router';
 import styles from './TodoControlPanel.module.css';
 
-export default function TodoControlPanel({
-	newTodo,
-	setNewTodo,
-	setSearchValue,
-	createTodo,
-	searchValue,
-	setSorted,
-	sorted,
-	allTodos,
-}) {
+export default function TodoControlPanel() {
+	const {
+		newTodo,
+		setNewTodo,
+		setSearchValue,
+		createTodo,
+		searchValue,
+		setSorted,
+		sorted,
+		allTodos,
+	} = useOutletContext();
+
 	function handleSubmit(event) {
 		event.preventDefault();
 		createTodo();

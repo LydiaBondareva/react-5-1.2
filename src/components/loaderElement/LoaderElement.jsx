@@ -1,9 +1,12 @@
+import { useOutletContext } from 'react-router';
 import styles from './LoaderElement.module.css';
 
 export default function LoaderElement() {
-	return (
-		<div className={styles['spinner-container']}>
-			<div className={styles.spinner}></div>
-		</div>
-	);
+	const { isLoading } = useOutletContext();
+	if (isLoading)
+		return (
+			<div className={styles['spinner-container']}>
+				<div className={styles.spinner}></div>
+			</div>
+		);
 }

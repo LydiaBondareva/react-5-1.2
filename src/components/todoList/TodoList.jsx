@@ -1,7 +1,8 @@
 import styles from './todoList.module.css';
-import { NavLink } from 'react-router';
+import { NavLink, useOutletContext } from 'react-router';
 
-export default function TodoList({ allTodos, searchValue }) {
+export default function TodoList() {
+	const { allTodos, searchValue } = useOutletContext();
 	return (
 		<ul className={styles.list}>
 			{allTodos.map((todo) => (

@@ -1,21 +1,22 @@
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useOutletContext } from 'react-router';
 import { useState, useRef } from 'react';
 import { FiTrash2, FiEdit2 } from 'react-icons/fi';
 import styles from './TaskPage.module.css';
 import LoaderElement from '../loaderElement/LoaderElement';
 import ErrorElement from '../errorElement/ErrorElement';
 
-export default function TaskPage({
-	allTodos,
-	newTaskValue,
-	setNewTaskValue,
-	changeTodo,
-	deleteTodo,
-	isTaskDeleted,
-	setIsTaskDeleted,
-	error,
-	isLoading,
-}) {
+export default function TaskPage() {
+	const {
+		allTodos,
+		newTaskValue,
+		setNewTaskValue,
+		changeTodo,
+		deleteTodo,
+		isTaskDeleted,
+		setIsTaskDeleted,
+		error,
+		isLoading,
+	} = useOutletContext();
 	const { id } = useParams();
 	const changeInpRef = useRef(null);
 	const [isTaskChanging, setIsTaskChanging] = useState(false);
